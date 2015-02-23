@@ -1,10 +1,5 @@
 package com.signicat.hystrix.servlet;
 
-import com.signicat.hystrix.servlet.AsyncWrapperServlet;
-import com.signicat.hystrix.servlet.HystrixAwareServlet;
-import com.signicat.platform.log.ThreadLocalLogContext;
-import com.signicat.platform.log.TimeTracker;
-
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -33,8 +28,6 @@ import ksc.portal.MockHttpServletResponse;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -154,42 +147,6 @@ public class AsyncWrapperServletTest {
     }
 
     @Test
-    public void require_That_Thread_Local_State_Is_Kept_For_Hystrix_Thread() throws Exception {
-        final String context = "Kontext";
-        final String httpSession = "httpSesjon";
-        final TimeTracker timeTracker = new TimeTracker(123L);
-        final String transactionId = "transaktionID";
-
-        final ThreadLocalServlet threadLocalServlet = new ThreadLocalServlet();
-        final AsyncThreadLocalWrapperServlet servlet = new AsyncThreadLocalWrapperServlet(context,
-                                                                                          httpSession,
-                                                                                          timeTracker,
-                                                                                          transactionId,
-                                                                                          threadLocalServlet,
-                                                                                          10 * 1000L);
-        try (TestServer server = new TestServer(0, servlet)) {
-            server.start();
-            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                HttpGet httpGet = new HttpGet("http://localhost:" + server.getPort() + "/bananarama");
-                try (CloseableHttpResponse httpResponse = httpclient.execute(httpGet)) {
-                    StatusLine statusLine = httpResponse.getStatusLine();
-                    assertThat(statusLine.getStatusCode(), equalTo(200));
-                    assertThat(statusLine.getReasonPhrase(), equalTo("OK"));
-                    EntityUtils.consume(httpResponse.getEntity());
-                    assertThat(threadLocalServlet.foundContext.await(60, TimeUnit.SECONDS), is(true));
-                    assertThat(threadLocalServlet.foundHttpSession.await(60, TimeUnit.SECONDS), is(true));
-                    assertThat(threadLocalServlet.foundTimeTracker.await(60, TimeUnit.SECONDS), is(true));
-                    assertThat(threadLocalServlet.foundTransactionId.await(60, TimeUnit.SECONDS), is(true));
-                    assertThat(threadLocalServlet.context, equalTo(context));
-                    assertThat(threadLocalServlet.httpSession, equalTo(httpSession));
-                    assertThat(threadLocalServlet.timeTracker, not(nullValue()));
-                    assertThat(threadLocalServlet.transactionId, equalTo(transactionId));
-                }
-            }
-        }
-    }
-
-    @Test
     public void require_That_Exception_In_Async_Wrapper_Servlet_Is_Handled_Correctly() throws Exception {
         final AsyncTestServlet servlet = new AsyncTestServlet(new CountDownLatch(1),
                                                               new CountDownLatch(1),
@@ -218,7 +175,6 @@ public class AsyncWrapperServletTest {
             }
         }
     }
-
 
     @Test
     public void require_That_Init_Calls_Init() throws ServletException {
@@ -254,77 +210,6 @@ public class AsyncWrapperServletTest {
         assertThat(request.isAsyncStarted(), is(true));
         assertThat(request.getAsyncContext().getTimeout(), equalTo(50000L));
         assertThat(mockServlet.servicedOnce.await(60, TimeUnit.SECONDS), is(true));
-    }
-
-    public static class AsyncThreadLocalWrapperServlet extends AsyncWrapperServlet {
-        private final String threadLocalContextToSet;
-        private final String threadLocalHttpSessionToSet;
-        private final TimeTracker threadLocalTimeTrackerToSet;
-        private final String threadLocalTransactionIdToSet;
-
-        public AsyncThreadLocalWrapperServlet(
-                String threadLocalContextToSet, String threadLocalHttpSessionToSet,
-                TimeTracker threadLocalTimeTrackerToSet, String threadLocalTransactionIdToSet,
-                HttpServlet hystrixAwareServlet,
-                final long timeout) {
-            super(hystrixAwareServlet, timeout, AsyncWrapperServlet.DEFAULT_CORE_POOL_SIZE);
-            this.threadLocalContextToSet = threadLocalContextToSet;
-            this.threadLocalHttpSessionToSet = threadLocalHttpSessionToSet;
-            this.threadLocalTimeTrackerToSet = threadLocalTimeTrackerToSet;
-            this.threadLocalTransactionIdToSet = threadLocalTransactionIdToSet;
-        }
-
-        @Override
-        public void onBeforeCommandSubmit() {
-            if (threadLocalContextToSet != null) {
-                ThreadLocalLogContext.setContext(threadLocalContextToSet);
-            }
-            if (threadLocalHttpSessionToSet != null) {
-                ThreadLocalLogContext.setHttpSession(threadLocalHttpSessionToSet);
-            }
-            if (threadLocalTimeTrackerToSet != null) {
-                ThreadLocalLogContext.createNewTimeTracker();
-            }
-            if (threadLocalTransactionIdToSet != null) {
-                ThreadLocalLogContext.setTransactionId(threadLocalTransactionIdToSet);
-            }
-        }
-
-        @Override
-        public void onAfterCommandSubmit() {
-            ThreadLocalLogContext.cleanup();
-        }
-    }
-
-    public static class ThreadLocalServlet extends HttpServlet {
-        private final CountDownLatch foundContext = new CountDownLatch(1);
-        private final CountDownLatch foundHttpSession = new CountDownLatch(1);
-        private final CountDownLatch foundTimeTracker = new CountDownLatch(1);
-        private final CountDownLatch foundTransactionId = new CountDownLatch(1);
-        private volatile String context;
-        private volatile String httpSession;
-        private volatile TimeTracker timeTracker;
-        private volatile String transactionId;
-
-        @Override
-        protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-            if (ThreadLocalLogContext.getContext() != null) {
-                foundContext.countDown();
-                context = ThreadLocalLogContext.getContext();
-            }
-            if (ThreadLocalLogContext.getHttpSession() != null) {
-                foundHttpSession.countDown();
-                httpSession = ThreadLocalLogContext.getHttpSession();
-            }
-            if (ThreadLocalLogContext.getTimeTracker() != null) {
-                foundTimeTracker.countDown();
-                timeTracker = ThreadLocalLogContext.getTimeTracker();
-            }
-            if (ThreadLocalLogContext.getTransactionId() != null) {
-                foundTransactionId.countDown();
-                transactionId = ThreadLocalLogContext.getTransactionId();
-            }
-        }
     }
 
     public static class AsyncTestServlet extends AsyncWrapperServlet {
@@ -368,9 +253,9 @@ public class AsyncWrapperServletTest {
         }
 
         @Override
-        public void onBeforeCommandSubmit() {
+        protected Runnable onBeforeCommandSubmit() {
             if (exceptionToThrow == null) {
-                return;
+                return super.onBeforeCommandSubmit();
             }
             if (exceptionToThrow instanceof RuntimeException) {
                 throw (RuntimeException) exceptionToThrow;
@@ -503,10 +388,10 @@ public class AsyncWrapperServletTest {
         }
     }
 
-    public static class TestServer implements AutoCloseable {
+    private static class TestServer implements AutoCloseable {
         private final Server server;
 
-        public TestServer(final int port, HttpServlet servlet) {
+        private TestServer(final int port, HttpServlet servlet) {
             server = new Server(port);
             ServletHandler handler = new ServletHandler();
             server.setHandler(handler);

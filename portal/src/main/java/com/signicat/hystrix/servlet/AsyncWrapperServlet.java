@@ -10,8 +10,6 @@ import com.netflix.hystrix.contrib.servopublisher.HystrixServoMetricsPublisher;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.netflix.hystrix.strategy.HystrixPlugins;
 import com.signicat.platform.log.DefaultLogger;
-import com.signicat.platform.log.ThreadLocalLogContext;
-import com.signicat.platform.log.TimeTracker;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -77,12 +75,8 @@ public class AsyncWrapperServlet extends HttpServlet {
         asyncContext.addListener(new BaseServletAsyncListener(timeoutAwareHttpServletReq,
                                                               timeoutAwareHttpServletResp));
 
-        onBeforeCommandSubmit();
-
-        String threadLocalContextToSet = ThreadLocalLogContext.getContext();
-        String threadLocalHttpSessionToSet = ThreadLocalLogContext.getHttpSession();
-        TimeTracker threadLocalTimeTrackerToSet = ThreadLocalLogContext.getTimeTracker();
-        String threadLocalTransactionIdToSet = ThreadLocalLogContext.getTransactionId();
+        Runnable runBefore = onBeforeCommandSubmit();
+        Runnable runAfter = onAfterCommandExecute();
 
         final String key = getCommandGroupKey(wrappedServlet, req);
         log.logTrace("Scheduling Hystrix command with key '" + key + "'");
@@ -113,10 +107,8 @@ public class AsyncWrapperServlet extends HttpServlet {
                                                 .withQueueSizeRejectionThreshold(queueRejectionSize)),
                         timeoutAwareHttpServletReq,
                         timeoutAwareHttpServletResp,
-                        threadLocalContextToSet,
-                        threadLocalHttpSessionToSet,
-                        threadLocalTimeTrackerToSet,
-                        threadLocalTransactionIdToSet);
+                        runBefore,
+                        runAfter);
 
         Observable<Object> observable = command.observe();
         observable.subscribe(new BaseServletObserver(asyncContext));
@@ -132,17 +124,42 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Useful? for subclasses, but really mostly for testing. Be careful, exceptions thrown from here
-     * will mess things up.
+     * Note that this is called from
+     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)},
+     * i.e. by the servlet container thread. The Runnable returned is called by the
+     * Hystrix thread (in a try-catch block, with logging), at the beginning of
+     * {@link com.netflix.hystrix.HystrixCommand#run()}.
      */
-    public void onBeforeCommandSubmit() {
+    protected Runnable onBeforeCommandSubmit() {
+        return new Runnable() {
+            @Override
+            public void run() {
+            }
+        };
     }
 
     /**
      * Useful? for subclasses, but really mostly for testing. Be careful, exceptions thrown from here
-     * will mess things up.
+     * will mess things up. Note that this is called from
+     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)},
+     * i.e. by the servlet container thread.
      */
-    public void onAfterCommandSubmit() {
+    protected void onAfterCommandSubmit() {
+    }
+
+    /**
+     * Note that this is called from
+     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)},
+     * i.e. by the servlet container thread. The Runnable returned is called by the
+     * Hystrix thread (in a try-catch block, with logging, inside a finally block), at the end of
+     * {@link com.netflix.hystrix.HystrixCommand#run()}.
+     */
+    protected Runnable onAfterCommandExecute() {
+        return new Runnable() {
+            @Override
+            public void run() {
+            }
+        };
     }
 
     public void servletComplete(AsyncEvent asyncEvent) throws IOException {
@@ -277,45 +294,36 @@ public class AsyncWrapperServlet extends HttpServlet {
     public class BaseServletCommand extends HystrixCommand<Object> {
         private final TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq;
         private final TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp;
-        private final String threadLocalContextToSet;
-        private final String threadLocalHttpSessionToSet;
-        private final TimeTracker threadLocalTimeTrackerToSet;
-        private final String threadLocalTransactionIdToSet;
-
+        private final Runnable runBefore;
+        private final Runnable runAfter;
 
         public BaseServletCommand(Setter setter,
                                   TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq,
                                   TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp,
-                                  String threadLocalContextToSet, String threadLocalHttpSessionToSet,
-                                  TimeTracker threadLocalTimeTrackerToSet, String threadLocalTransactionIdToSet) {
+                                  Runnable runBefore, Runnable runAfter) {
             super(setter);
             this.timeoutAwareHttpServletReq = timeoutAwareHttpServletReq;
             this.timeoutAwareHttpServletResp = timeoutAwareHttpServletResp;
-            this.threadLocalContextToSet = threadLocalContextToSet;
-            this.threadLocalHttpSessionToSet = threadLocalHttpSessionToSet;
-            this.threadLocalTimeTrackerToSet = threadLocalTimeTrackerToSet;
-            this.threadLocalTransactionIdToSet = threadLocalTransactionIdToSet;
+            this.runBefore = runBefore;
+            this.runAfter = runAfter;
         }
 
         @Override
         protected Object run() throws Exception {
             try {
-                if (threadLocalContextToSet != null) {
-                    ThreadLocalLogContext.setContext(threadLocalContextToSet);
-                }
-                if (threadLocalHttpSessionToSet != null) {
-                    ThreadLocalLogContext.setHttpSession(threadLocalHttpSessionToSet);
-                }
-                if (threadLocalTimeTrackerToSet != null) {
-                    ThreadLocalLogContext.createNewTimeTracker();
-                }
-                if (threadLocalTransactionIdToSet != null) {
-                    ThreadLocalLogContext.setTransactionId(threadLocalTransactionIdToSet);
-                }
+                runBefore.run();
+            } catch (Exception e) {
+                log.logError("Exception in Hystrix pre-execute hook", e);
+            }
 
+            try {
                 wrappedServlet.service(timeoutAwareHttpServletReq, timeoutAwareHttpServletResp);
             } finally {
-                ThreadLocalLogContext.cleanup();
+                try {
+                    runAfter.run();
+                } catch (Exception e) {
+                    log.logError("Exception in Hystrix post-execute hook", e);
+                }
             }
             return new Object();
         }
