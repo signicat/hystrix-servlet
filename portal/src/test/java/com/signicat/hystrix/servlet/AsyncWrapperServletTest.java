@@ -15,7 +15,6 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.Test;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -53,14 +52,11 @@ public class AsyncWrapperServletTest {
                                                               new CountDownLatch(1),
                                                               null,
                                                               new TimeoutServlet(servletTimeout), 1000L);
-        TestServer server = new TestServer(0, servlet);
-        try {
+        try (TestServer server = new TestServer(0, servlet)) {
             server.start();
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 HttpGet httpGet = new HttpGet("http://localhost:" + server.getPort() + "/bananarama");
-                CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
-                try {
+                try (CloseableHttpResponse httpResponse = httpclient.execute(httpGet)) {
                     StatusLine statusLine = httpResponse.getStatusLine();
                     assertThat(statusLine.getStatusCode(), equalTo(504));
                     assertThat(statusLine.getReasonPhrase(), equalTo("Timeout from async listener"));
@@ -71,14 +67,8 @@ public class AsyncWrapperServletTest {
                     assertThat(servlet.hystrixError.await(60, TimeUnit.SECONDS), is(true));
                     assertThat(servlet.hystrixCompleted.getCount(), equalTo(1L));
                     assertThat(servlet.hystrixNext.getCount(), equalTo(1L));
-                } finally {
-                    httpResponse.close();
                 }
-            } finally {
-                httpclient.close();
             }
-        } finally {
-            server.close();
         }
     }
 
@@ -95,14 +85,11 @@ public class AsyncWrapperServletTest {
                                                               new CountDownLatch(1),
                                                               null,
                                                               new TimeoutServlet(servletTimeout, hystrixError), 1000L);
-        TestServer server = new TestServer(0, servlet);
-        try {
+        try (TestServer server = new TestServer(0, servlet)) {
             server.start();
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 HttpGet httpGet = new HttpGet("http://localhost:" + server.getPort() + "/bananarama");
-                CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
-                try {
+                try (CloseableHttpResponse httpResponse = httpclient.execute(httpGet)) {
                     StatusLine statusLine = httpResponse.getStatusLine();
                     assertThat(statusLine.getStatusCode(), equalTo(504));
                     assertThat(statusLine.getReasonPhrase(), equalTo("Timeout from async listener"));
@@ -113,28 +100,19 @@ public class AsyncWrapperServletTest {
                     assertThat(servlet.hystrixError.await(60, TimeUnit.SECONDS), is(true));
                     assertThat(servlet.hystrixCompleted.getCount(), equalTo(1L));
                     assertThat(servlet.hystrixNext.getCount(), equalTo(1L));
-                } finally {
-                    httpResponse.close();
                 }
-            } finally {
-                httpclient.close();
             }
-        } finally {
-            server.close();
         }
     }
 
     @Test
     public void require_That_RuntimeException_In_Wrapped_Servlet_Is_Handled_Correctly() throws Exception {
         final AsyncTestServlet servlet = new AsyncTestServlet(new ExceptionThrowingServlet(new RuntimeException("Bananarama failed")), 10 * 1000L);
-        TestServer server = new TestServer(0, servlet);
-        try {
+        try (TestServer server = new TestServer(0, servlet)) {
             server.start();
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 HttpGet httpGet = new HttpGet("http://localhost:" + server.getPort() + "/bananarama");
-                CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
-                try {
+                try (CloseableHttpResponse httpResponse = httpclient.execute(httpGet)) {
                     StatusLine statusLine = httpResponse.getStatusLine();
                     assertThat(statusLine.getStatusCode(), equalTo(500));
                     assertThat(statusLine.getReasonPhrase(), equalTo("Error from async observer"));
@@ -145,28 +123,19 @@ public class AsyncWrapperServletTest {
                     assertThat(servlet.servletComplete.await(60, TimeUnit.SECONDS), is(true));
                     assertThat(servlet.servletTimeout.getCount(), equalTo(1L));
                     assertThat(servlet.servletError.getCount(), equalTo(1L));
-                } finally {
-                    httpResponse.close();
                 }
-            } finally {
-                httpclient.close();
             }
-        } finally {
-            server.close();
         }
     }
 
     @Test
     public void require_That_IOException_In_Wrapped_Servlet_Is_Handled_Correctly() throws Exception {
         final AsyncTestServlet servlet = new AsyncTestServlet(new ExceptionThrowingServlet(new IOException("Bananarama IO failed")), 10 * 1000L);
-        TestServer server = new TestServer(0, servlet);
-        try {
+        try (TestServer server = new TestServer(0, servlet)) {
             server.start();
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 HttpGet httpGet = new HttpGet("http://localhost:" + server.getPort() + "/bananarama");
-                CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
-                try {
+                try (CloseableHttpResponse httpResponse = httpclient.execute(httpGet)) {
                     StatusLine statusLine = httpResponse.getStatusLine();
                     assertThat(statusLine.getStatusCode(), equalTo(500));
                     assertThat(statusLine.getReasonPhrase(), equalTo("Error from async observer"));
@@ -177,14 +146,8 @@ public class AsyncWrapperServletTest {
                     assertThat(servlet.servletComplete.await(60, TimeUnit.SECONDS), is(true));
                     assertThat(servlet.servletTimeout.getCount(), equalTo(1L));
                     assertThat(servlet.servletError.getCount(), equalTo(1L));
-                } finally {
-                    httpResponse.close();
                 }
-            } finally {
-                httpclient.close();
             }
-        } finally {
-            server.close();
         }
     }
 
@@ -202,14 +165,11 @@ public class AsyncWrapperServletTest {
                                                                                           transactionId,
                                                                                           threadLocalServlet,
                                                                                           10 * 1000L);
-        TestServer server = new TestServer(0, servlet);
-        try {
+        try (TestServer server = new TestServer(0, servlet)) {
             server.start();
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 HttpGet httpGet = new HttpGet("http://localhost:" + server.getPort() + "/bananarama");
-                CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
-                try {
+                try (CloseableHttpResponse httpResponse = httpclient.execute(httpGet)) {
                     StatusLine statusLine = httpResponse.getStatusLine();
                     assertThat(statusLine.getStatusCode(), equalTo(200));
                     assertThat(statusLine.getReasonPhrase(), equalTo("OK"));
@@ -222,14 +182,8 @@ public class AsyncWrapperServletTest {
                     assertThat(threadLocalServlet.httpSession, equalTo(httpSession));
                     assertThat(threadLocalServlet.timeTracker, not(nullValue()));
                     assertThat(threadLocalServlet.transactionId, equalTo(transactionId));
-                } finally {
-                    httpResponse.close();
                 }
-            } finally {
-                httpclient.close();
             }
-        } finally {
-            server.close();
         }
     }
 
@@ -243,14 +197,11 @@ public class AsyncWrapperServletTest {
                                                               new CountDownLatch(1),
                                                               new RuntimeException("Exception in wrapper"),
                                                               new ExceptionThrowingServlet(null), 10 * 1000L);
-        TestServer server = new TestServer(0, servlet);
-        try {
+        try (TestServer server = new TestServer(0, servlet)) {
             server.start();
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 HttpGet httpGet = new HttpGet("http://localhost:" + server.getPort() + "/bananarama");
-                CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
-                try {
+                try (CloseableHttpResponse httpResponse = httpclient.execute(httpGet)) {
                     StatusLine statusLine = httpResponse.getStatusLine();
                     assertThat(statusLine.getStatusCode(), equalTo(500));
                     //assertThat(statusLine.getReasonPhrase(), equalTo("Server Error"));  //apparently from Jetty
@@ -261,14 +212,8 @@ public class AsyncWrapperServletTest {
                     assertThat(servlet.hystrixError.getCount(), equalTo(1L));
                     assertThat(servlet.hystrixCompleted.getCount(), equalTo(1L));
                     assertThat(servlet.hystrixNext.getCount(), equalTo(1L));
-                } finally {
-                    httpResponse.close();
                 }
-            } finally {
-                httpclient.close();
             }
-        } finally {
-            server.close();
         }
     }
 
@@ -349,7 +294,7 @@ public class AsyncWrapperServletTest {
         }
     }
 
-    public static class ThreadLocalServlet extends TestHystrixAwareServlet {
+    public static class ThreadLocalServlet extends HttpServlet {
         private final CountDownLatch foundContext = new CountDownLatch(1);
         private final CountDownLatch foundHttpSession = new CountDownLatch(1);
         private final CountDownLatch foundTimeTracker = new CountDownLatch(1);
@@ -446,6 +391,7 @@ public class AsyncWrapperServletTest {
             super.servletTimeout(asyncEvent);
         }
 
+        @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
         @Override
         public void servletError(AsyncEvent asyncEvent) throws IOException {
             System.err.println("servletError()");
@@ -479,7 +425,7 @@ public class AsyncWrapperServletTest {
         }
     }
     
-    public static class ExceptionThrowingServlet extends TestHystrixAwareServlet {
+    public static class ExceptionThrowingServlet extends HttpServlet {
         private final Exception exceptionToThrow;
 
         public ExceptionThrowingServlet(Exception exceptionToThrow) {
@@ -503,7 +449,7 @@ public class AsyncWrapperServletTest {
         }
     }
 
-    public static class TimeoutServlet extends TestHystrixAwareServlet {
+    public static class TimeoutServlet extends HttpServlet {
         private final CountDownLatch[] latchesToWaitForUntilReturning;
 
         public TimeoutServlet(final CountDownLatch... latchesToWaitForUntilReturning) {
@@ -533,7 +479,7 @@ public class AsyncWrapperServletTest {
         }
     }
 
-    public static class MockServlet extends TestHystrixAwareServlet {
+    public static class MockServlet extends HttpServlet {
         private boolean inited = false;
         private boolean destroyed = false;
         CountDownLatch servicedOnce = new CountDownLatch(1);
@@ -555,7 +501,7 @@ public class AsyncWrapperServletTest {
         }
     }
 
-    public static class TestServer implements Closeable {  //TODO: AutoCloseable
+    public static class TestServer implements AutoCloseable {
         private final Server server;
 
         public TestServer(final int port, HttpServlet servlet) {
@@ -581,13 +527,6 @@ public class AsyncWrapperServletTest {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static class TestHystrixAwareServlet extends HttpServlet implements HystrixAwareServlet {
-        @Override
-        public String getCommandGroupKey(HttpServletRequest request) {
-            return AsyncWrapperServlet.DEFAULT_COMMAND_GROUP_KEY;
         }
     }
 }
