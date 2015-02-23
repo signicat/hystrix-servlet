@@ -89,7 +89,7 @@ public class AsyncWrapperServlet extends HttpServlet {
 
         //double thread pool size for pool with magic name 'default'
         final int size = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
-        final int queueSize = corePoolSize * 4;;
+        final int queueSize = corePoolSize * 4;
         final int queueRejectionSize = corePoolSize * 2;
 
         BaseServletCommand command =
