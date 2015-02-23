@@ -1,5 +1,7 @@
 package com.signicat.hystrix.servlet;
 
+import com.signicat.hystrix.servlet.AsyncWrapperServlet;
+import com.signicat.hystrix.servlet.HystrixAwareServlet;
 import com.signicat.platform.log.ThreadLocalLogContext;
 import com.signicat.platform.log.TimeTracker;
 
