@@ -1,7 +1,5 @@
 package com.signicat.hystrix.servlet;
 
-import com.signicat.hystrix.servlet.AsyncWrapperServlet;
-import com.signicat.hystrix.servlet.HystrixAwareServlet;
 import com.signicat.platform.log.ThreadLocalLogContext;
 import com.signicat.platform.log.TimeTracker;
 
@@ -320,7 +318,7 @@ public class AsyncWrapperServletTest {
         public AsyncThreadLocalWrapperServlet(
                 String threadLocalContextToSet, String threadLocalHttpSessionToSet,
                 TimeTracker threadLocalTimeTrackerToSet, String threadLocalTransactionIdToSet,
-                HystrixAwareServlet hystrixAwareServlet,
+                HttpServlet hystrixAwareServlet,
                 final long timeout) {
             super(hystrixAwareServlet, timeout, AsyncWrapperServlet.DEFAULT_CORE_POOL_SIZE);
             this.threadLocalContextToSet = threadLocalContextToSet;
@@ -391,7 +389,7 @@ public class AsyncWrapperServletTest {
         private final CountDownLatch hystrixNext;
         private final Exception exceptionToThrow;
 
-        public AsyncTestServlet(HystrixAwareServlet hystrixAwareServlet, long timeoutMillis) {
+        public AsyncTestServlet(HttpServlet hystrixAwareServlet, long timeoutMillis) {
             this(new CountDownLatch(1),
                  new CountDownLatch(1),
                  new CountDownLatch(1),
@@ -410,7 +408,7 @@ public class AsyncWrapperServletTest {
                                 CountDownLatch hystrixError,
                                 CountDownLatch hystrixNext,
                                 Exception exceptionToThrow,
-                                HystrixAwareServlet hystrixAwareServlet,
+                                HttpServlet hystrixAwareServlet,
                                 final long timeout) {
             super(hystrixAwareServlet, timeout, AsyncWrapperServlet.DEFAULT_CORE_POOL_SIZE);
             this.servletComplete = servletComplete;
@@ -586,7 +584,7 @@ public class AsyncWrapperServletTest {
         }
     }
 
-    public static class TestHystrixAwareServlet extends HystrixAwareServlet {
+    public static class TestHystrixAwareServlet extends HttpServlet implements HystrixAwareServlet {
         @Override
         public String getCommandGroupKey(HttpServletRequest request) {
             return AsyncWrapperServlet.DEFAULT_COMMAND_GROUP_KEY;
