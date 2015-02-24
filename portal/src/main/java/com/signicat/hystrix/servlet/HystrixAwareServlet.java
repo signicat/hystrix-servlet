@@ -1,15 +1,15 @@
 package com.signicat.hystrix.servlet;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 
 
 /**
- * Extend this class if you want to decide which thread pool your servlet runs in
+ * Implement this interface if you want to decide which thread pool your servlet runs in
  * if it is executed inside {@link AsyncWrapperServlet}.
  *
  * @see AsyncWrapperServlet
+ * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
  */
-public abstract class HystrixAwareServlet extends HttpServlet {
-    public abstract String getCommandGroupKey(HttpServletRequest request);
+public interface HystrixAwareServlet {
+    public String getCommandGroupKey(HttpServletRequest request);
 }
