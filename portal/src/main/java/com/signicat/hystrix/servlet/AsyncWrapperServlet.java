@@ -10,10 +10,11 @@ import com.netflix.hystrix.contrib.servopublisher.HystrixServoMetricsPublisher;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.netflix.hystrix.strategy.HystrixPlugins;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -40,7 +41,7 @@ import rx.Observer;
 public class AsyncWrapperServlet extends HttpServlet {
 
     public static final String DEFAULT_COMMAND_GROUP_KEY = "default";
-    private static final Logger log = Logger.getLogger(AsyncWrapperServlet.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(AsyncWrapperServlet.class);
     public static final long DEFAULT_TIMEOUT = 50000L;
     private static final int HYSTRIX_ADDED_TIMEOUT_DELAY = 10000; //servlet cntnr will time things out bf Hystrix does
     public static final int DEFAULT_CORE_POOL_SIZE = 100;
@@ -87,7 +88,7 @@ public class AsyncWrapperServlet extends HttpServlet {
         Runnable runAfter = onAfterCommandExecute();
 
         final String key = getCommandGroupKey(wrappedServlet, req);
-        log.log(Level.INFO, "Scheduling Hystrix command with key '" + key + "'");
+        log.info("Scheduling Hystrix command with key '" + key + "'");
 
         //double thread pool size for pool with magic name 'default'
         final int size = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
@@ -191,7 +192,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     protected void onServletTimeout(AsyncEvent asyncEvent) throws IOException {
         try {
             final String msg = "Timeout from async listener";
-            log.log(Level.FINE, msg, asyncEvent.getThrowable());
+            log.debug(msg, asyncEvent.getThrowable());
             ((HttpServletResponse) asyncEvent.getAsyncContext().getResponse())
                     .sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT, msg);
         } catch (Exception e) {
@@ -217,7 +218,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     protected void onServletError(AsyncEvent asyncEvent) throws IOException {
         try {
             final String msg = "Error from async listener";
-            log.log(Level.WARNING, msg, asyncEvent.getThrowable());
+            log.warn(msg, asyncEvent.getThrowable());
             ((HttpServletResponse) asyncEvent.getAsyncContext().getResponse())
                     .sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
         } catch (Exception e) {
@@ -263,15 +264,15 @@ public class AsyncWrapperServlet extends HttpServlet {
                 HystrixRuntimeException hre = (HystrixRuntimeException) throwable;
                 switch (hre.getFailureType()) {
                     case TIMEOUT:
-                        log.log(Level.FINE, msg, throwable);
+                        log.debug(msg, throwable);
                         response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT, msg);
                         break;
                     case COMMAND_EXCEPTION:
-                        log.log(Level.WARNING, msg, throwable);
+                        log.warn(msg, throwable);
                         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
                         break;
                     default:
-                        log.log(Level.FINE, msg, throwable);
+                        log.debug(msg, throwable);
                         response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
                         break;
                 }
@@ -363,7 +364,7 @@ public class AsyncWrapperServlet extends HttpServlet {
             try {
                 runBefore.run();
             } catch (Exception e) {
-                log.log(Level.INFO, "Exception in Hystrix pre-execute hook", e);
+                log.info("Exception in Hystrix pre-execute hook", e);
             }
 
             try {
@@ -372,7 +373,7 @@ public class AsyncWrapperServlet extends HttpServlet {
                 try {
                     runAfter.run();
                 } catch (Exception e) {
-                    log.log(Level.INFO, "Exception in Hystrix post-execute hook", e);
+                    log.info("Exception in Hystrix post-execute hook", e);
                 }
             }
             return new Object();
