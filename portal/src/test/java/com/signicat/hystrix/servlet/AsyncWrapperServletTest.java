@@ -265,50 +265,50 @@ public class AsyncWrapperServletTest {
         }
 
         @Override
-        public void servletComplete(AsyncEvent asyncEvent) throws IOException {
-            System.err.println("servletComplete()");
+        public void onServletCompleted(AsyncEvent asyncEvent) throws IOException {
+            System.err.println("onServletCompleted()");
             servletComplete.countDown();
-            super.servletComplete(asyncEvent);
+            super.onServletCompleted(asyncEvent);
         }
 
         @Override
-        public void servletTimeout(AsyncEvent asyncEvent) throws IOException {
-            System.err.println("servletTimeout()");
+        public void onServletTimeout(AsyncEvent asyncEvent) throws IOException {
+            System.err.println("onServletTimeout()");
             servletTimeout.countDown();
-            super.servletTimeout(asyncEvent);
+            super.onServletTimeout(asyncEvent);
         }
 
         @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
         @Override
-        public void servletError(AsyncEvent asyncEvent) throws IOException {
-            System.err.println("servletError()");
+        public void onServletError(AsyncEvent asyncEvent) throws IOException {
+            System.err.println("onServletError()");
             if (asyncEvent.getThrowable() != null) {
                 asyncEvent.getThrowable().printStackTrace(System.err);
             }
             servletError.countDown();
-            super.servletError(asyncEvent);
+            super.onServletError(asyncEvent);
         }
 
         @Override
-        public void hystrixCompleted(AsyncContext asyncContext) {
-            System.err.println("hystrixCompleted()");
+        public void onHystrixCompleted(AsyncContext asyncContext) {
+            System.err.println("onHystrixCompleted()");
             hystrixCompleted.countDown();
-            super.hystrixCompleted(asyncContext);
+            super.onHystrixCompleted(asyncContext);
         }
 
         @Override
-        public void hystrixError(AsyncContext asyncContext, Throwable throwable) {
-            System.err.println("hystrixError()");
+        public void onHystrixError(AsyncContext asyncContext, Throwable throwable) {
+            System.err.println("onHystrixError()");
             throwable.printStackTrace(System.err);
             hystrixError.countDown();
-            super.hystrixError(asyncContext, throwable);
+            super.onHystrixError(asyncContext, throwable);
         }
 
         @Override
-        public void hystrixNext(AsyncContext asyncContext, Object o) {
-            System.err.println("hystrixNext()");
+        public void onHystrixNext(AsyncContext asyncContext, Object o) {
+            System.err.println("onHystrixNext()");
             hystrixNext.countDown();
-            super.hystrixNext(asyncContext, o);
+            super.onHystrixNext(asyncContext, o);
         }
     }
     

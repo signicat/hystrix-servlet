@@ -162,11 +162,11 @@ public class AsyncWrapperServlet extends HttpServlet {
         };
     }
 
-    protected void servletComplete(AsyncEvent asyncEvent) throws IOException {
+    protected void onServletCompleted(AsyncEvent asyncEvent) throws IOException {
     }
 
     @SuppressWarnings({"EmptyCatchBlock", "ThrowableResultOfMethodCallIgnored"})
-    protected void servletTimeout(AsyncEvent asyncEvent) throws IOException {
+    protected void onServletTimeout(AsyncEvent asyncEvent) throws IOException {
         try {
             final String msg = "Timeout from async listener";
             log.log(Level.FINE, msg, asyncEvent.getThrowable());
@@ -182,7 +182,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings({"EmptyCatchBlock", "ThrowableResultOfMethodCallIgnored"})
-    protected void servletError(AsyncEvent asyncEvent) throws IOException {
+    protected void onServletError(AsyncEvent asyncEvent) throws IOException {
         try {
             final String msg = "Error from async listener";
             log.log(Level.WARNING, msg, asyncEvent.getThrowable());
@@ -198,7 +198,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings("EmptyCatchBlock")
-    protected void hystrixCompleted(AsyncContext asyncContext) {
+    protected void onHystrixCompleted(AsyncContext asyncContext) {
         try {
             asyncContext.complete();
         } catch (Exception e) {
@@ -206,7 +206,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings("EmptyCatchBlock")
-    protected void hystrixError(AsyncContext asyncContext, Throwable throwable) {
+    protected void onHystrixError(AsyncContext asyncContext, Throwable throwable) {
         try {
             final HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
             final String msg = "Error from async observer";
@@ -238,7 +238,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings("EmptyCatchBlock")
-    protected void hystrixNext(AsyncContext asyncContext, Object o) {
+    protected void onHystrixNext(AsyncContext asyncContext, Object o) {
         try {
             asyncContext.complete();
         } catch (Exception e) {
@@ -259,21 +259,21 @@ public class AsyncWrapperServlet extends HttpServlet {
         public void onComplete(AsyncEvent asyncEvent) throws IOException {
             timeoutAwareHttpServletReq.resetWrapped();
             timeoutAwareHttpServletResp.resetWrapped();
-            servletComplete(asyncEvent);
+            onServletCompleted(asyncEvent);
         }
 
         @Override
         public void onTimeout(AsyncEvent asyncEvent) throws IOException {
             timeoutAwareHttpServletReq.resetWrapped();
             timeoutAwareHttpServletResp.resetWrapped();
-            servletTimeout(asyncEvent);
+            onServletTimeout(asyncEvent);
         }
 
         @Override
         public void onError(AsyncEvent asyncEvent) throws IOException {
             timeoutAwareHttpServletReq.resetWrapped();
             timeoutAwareHttpServletResp.resetWrapped();
-            servletError(asyncEvent);
+            onServletError(asyncEvent);
         }
 
         @Override
@@ -328,17 +328,17 @@ public class AsyncWrapperServlet extends HttpServlet {
 
         @Override
         public void onCompleted() {
-            hystrixCompleted(asyncContext);
+            onHystrixCompleted(asyncContext);
         }
 
         @Override
         public void onError(Throwable throwable) {
-            hystrixError(asyncContext, throwable);
+            onHystrixError(asyncContext, throwable);
         }
 
         @Override
         public void onNext(Object o) {
-            hystrixNext(asyncContext, o);
+            onHystrixNext(asyncContext, o);
         }
     }
 
