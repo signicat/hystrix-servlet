@@ -28,10 +28,10 @@ import rx.Observable;
 import rx.Observer;
 
 /**
- * Wrapper class for executing any {@link javax.servlet.http.HttpServlet} within a Hystrix thread pool. Subclass
- * this, create a no-arg constructor in the subclass, and pass the HttpServlet to wrap to the superclass. Then
- * configure the new subclass to run in web.xml, instead of the old (wrapped) servlet. If you want to control
- * which thread pool a request ends up executing within, make the wrapped servlet implement
+ * Wrapper class for executing any {@link javax.servlet.http.HttpServlet} within a Hystrix thread pool. Subclass this,
+ * create a no-arg constructor in the subclass, and pass the HttpServlet to wrap to the superclass. Then configure the
+ * new subclass to run in web.xml, instead of the old (wrapped) servlet. If you want to control which thread pool a
+ * request ends up executing within, make the wrapped servlet implement
  * {@link com.signicat.hystrix.servlet.HystrixAwareServlet#getCommandGroupKey(javax.servlet.http.HttpServletRequest)}.
  *
  * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
@@ -41,9 +41,9 @@ public class AsyncWrapperServlet extends HttpServlet {
 
     public static final String DEFAULT_COMMAND_GROUP_KEY = "default";
     private static final Logger log = Logger.getLogger(AsyncWrapperServlet.class.getName());
-    public  static final long DEFAULT_TIMEOUT = 50000L;
-    private static final int HYSTRIX_ADDED_TIMEOUT_DELAY = 10000;  //we want the servlet container to time things out before Hystrix does
-    public  static final int DEFAULT_CORE_POOL_SIZE = 100;
+    public static final long DEFAULT_TIMEOUT = 50000L;
+    private static final int HYSTRIX_ADDED_TIMEOUT_DELAY = 10000; //servlet cntnr will time things out bf Hystrix does
+    public static final int DEFAULT_CORE_POOL_SIZE = 100;
     private final HttpServlet wrappedServlet;
     private final long timeoutMillis;
     private final int corePoolSize;
@@ -74,7 +74,8 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @Override
-    public void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    public void service(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
         AsyncContext asyncContext = req.startAsync();
         asyncContext.setTimeout(timeoutMillis);
         TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq = new TimeoutAwareHttpServletRequest(req);
@@ -132,9 +133,9 @@ public class AsyncWrapperServlet extends HttpServlet {
 
     /**
      * Note that this is called from
-     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)},
-     * i.e. by the servlet container thread. The Runnable returned is called by the
-     * Hystrix thread (in a try-catch block, with logging), at the beginning of
+     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest,
+     * javax.servlet.http.HttpServletResponse)}, i.e. by the servlet container thread. The Runnable returned is called
+     * by the Hystrix thread (in a try-catch block, with logging), at the beginning of
      * {@link com.netflix.hystrix.HystrixCommand#run()}.
      */
     protected Runnable onBeforeCommandSubmit() {
@@ -146,19 +147,19 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Useful? for subclasses, but really mostly for testing. Note that this is called from
-     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)},
-     * i.e. by the servlet container thread.
+     * Useful? for subclasses, but really mostly for testing. Note that this is called from {@link
+     * com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest,
+     * javax.servlet.http.HttpServletResponse)}, i.e. by the servlet container thread.
      */
     protected void onAfterCommandSubmit() {
     }
 
     /**
      * Note that this is called from
-     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)},
-     * i.e. by the servlet container thread. The Runnable returned is called by the
-     * Hystrix thread (in a try-catch block, with logging, inside a finally block), at the end of
-     * {@link com.netflix.hystrix.HystrixCommand#run()}.
+     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest,
+     * javax.servlet.http.HttpServletResponse)}, i.e. by the servlet container thread. The Runnable returned is called
+     * by the Hystrix thread (in a try-catch block, with logging, inside a finally block), at the end of {@link
+     * com.netflix.hystrix.HystrixCommand#run()}.
      */
     protected Runnable onAfterCommandExecute() {
         return new Runnable() {
@@ -169,8 +170,8 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Override this method if you want to do some extra work when
-     * {@link javax.servlet.AsyncContext#complete()} has been called.
+     * Override this method if you want to do some extra work when {@link javax.servlet.AsyncContext#complete()} has
+     * been called.
      *
      * @param asyncEvent the AsyncEvent indicating that an asynchronous operation has been completed
      * @throws IOException if an I/O related error has occurred during the processing of the given AsyncEvent
@@ -179,10 +180,9 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Override this method if you want to do some extra work when
-     * the servlet container has timed out the request. It is HIGHLY recommended to call
-     * the implementation in this superclass as well, to be certain that
-     * {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange errors.
+     * Override this method if you want to do some extra work when the servlet container has timed out the request. It
+     * is HIGHLY recommended to call the implementation in this superclass as well, to be certain that {@link
+     * javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange errors.
      *
      * @param asyncEvent the AsyncEvent indicating that an asynchronous operation has timed out
      * @throws IOException if an I/O related error has occurred during the processing of the given AsyncEvent
@@ -204,12 +204,11 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Override this method if you want to do some extra work when
-     * the servlet container has caught an exception from
-     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
-     * It is HIGHLY recommended to call
-     * the implementation in this superclass as well, to be certain that
-     * {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange errors.
+     * Override this method if you want to do some extra work when the servlet container has caught an exception from
+     * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest,
+     * javax.servlet.http.HttpServletResponse)}. It is HIGHLY recommended to call the implementation in this superclass
+     * as well, to be certain that {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result
+     * in strange errors.
      *
      * @param asyncEvent the AsyncEvent indicating that an asynchronous operation has failed to complete
      * @throws IOException if an I/O related error has occurred during the processing of the given AsyncEvent
@@ -231,11 +230,10 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Override this method if you want to do some extra work when
-     * Hystrix is notified that the processing of the request/response is done.
-     * It is HIGHLY recommended to call
-     * the implementation in this superclass as well, to be certain that
-     * {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange errors.
+     * Override this method if you want to do some extra work when Hystrix is notified that the processing of the
+     * request/response is done. It is HIGHLY recommended to call the implementation in this superclass as well, to be
+     * certain that {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange
+     * errors.
      *
      * @param asyncContext The AsyncContext to complete.
      */
@@ -248,15 +246,13 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Override this method if you want to do some extra work when
-     * Hystrix has caught an exception from {@link com.netflix.hystrix.HystrixCommand#run()}, or if the
-     * operation has timed out.
-     * It is HIGHLY recommended to call
-     * the implementation in this superclass as well, to be certain that
-     * {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange errors.
+     * Override this method if you want to do some extra work when Hystrix has caught an exception from {@link
+     * com.netflix.hystrix.HystrixCommand#run()}, or if the operation has timed out. It is HIGHLY recommended to call
+     * the implementation in this superclass as well, to be certain that {@link javax.servlet.AsyncContext#complete()}
+     * is called. Failure to do so will result in strange errors.
      *
      * @param asyncContext The AsyncContext to complete.
-     * @param throwable The Throwable caught.
+     * @param throwable    The Throwable caught.
      */
     @SuppressWarnings("EmptyCatchBlock")
     protected void onHystrixError(AsyncContext asyncContext, Throwable throwable) {
@@ -291,14 +287,13 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Override this method if you want to do some extra work when
-     * Hystrix is notified that the processing of the request/response is done.
-     * It is HIGHLY recommended to call
-     * the implementation in this superclass as well, to be certain that
-     * {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange errors.
+     * Override this method if you want to do some extra work when Hystrix is notified that the processing of the
+     * request/response is done. It is HIGHLY recommended to call the implementation in this superclass as well, to be
+     * certain that {@link javax.servlet.AsyncContext#complete()} is called. Failure to do so will result in strange
+     * errors.
      *
      * @param asyncContext The AsyncContext to complete.
-     * @param o In our implementation, a dummy object that is not useful in any way.
+     * @param o            In our implementation, a dummy object that is not useful in any way.
      */
     @SuppressWarnings("EmptyCatchBlock")
     protected void onHystrixNext(AsyncContext asyncContext, Object o) {
@@ -309,11 +304,12 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     private class BaseServletAsyncListener implements AsyncListener {
+
         private final TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq;
         private final TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp;
 
         private BaseServletAsyncListener(TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq,
-                                        TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp) {
+                                         TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp) {
             this.timeoutAwareHttpServletReq = timeoutAwareHttpServletReq;
             this.timeoutAwareHttpServletResp = timeoutAwareHttpServletResp;
         }
@@ -345,15 +341,16 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     private class BaseServletCommand extends HystrixCommand<Object> {
+
         private final TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq;
         private final TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp;
         private final Runnable runBefore;
         private final Runnable runAfter;
 
         private BaseServletCommand(Setter setter,
-                                  TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq,
-                                  TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp,
-                                  Runnable runBefore, Runnable runAfter) {
+                                   TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq,
+                                   TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp,
+                                   Runnable runBefore, Runnable runAfter) {
             super(setter);
             this.timeoutAwareHttpServletReq = timeoutAwareHttpServletReq;
             this.timeoutAwareHttpServletResp = timeoutAwareHttpServletResp;
@@ -383,6 +380,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     private class BaseServletObserver implements Observer<Object> {
+
         private final AsyncContext asyncContext;
 
         private BaseServletObserver(AsyncContext asyncContext) {

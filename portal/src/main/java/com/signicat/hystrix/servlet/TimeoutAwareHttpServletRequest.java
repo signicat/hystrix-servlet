@@ -25,18 +25,18 @@ import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 /**
- * In our implementation, we let the Servlet Container time things out _before_ Hystrix does (basically
- * just a design choice, but the other way around wouldn't work any better). So we're passing a Request
- * and a Response to the wrapped Servlet, and after some time, the Servlet Container will time out if processing
- * takes too long. In that case, we do not want the wrapped Servlet to still be able to tamper with
- * the actual, real Request or Response. Thus, we use this wrapper, and we call {@link #resetWrapped()}
- * when the Servlet Container times out or completes. Any subsequent calls to the Request or Response
- * from the wrapped servlet will throw an exception.
+ * In our implementation, we let the Servlet Container time things out _before_ Hystrix does (basically just a design
+ * choice, but the other way around wouldn't work any better). So we're passing a Request and a Response to the wrapped
+ * Servlet, and after some time, the Servlet Container will time out if processing takes too long. In that case, we do
+ * not want the wrapped Servlet to still be able to tamper with the actual, real Request or Response. Thus, we use this
+ * wrapper, and we call {@link #resetWrapped()} when the Servlet Container times out or completes. Any subsequent calls
+ * to the Request or Response from the wrapped servlet will throw an exception.
  *
  * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
  * @see TimeoutAwareHttpServletResponse
  */
 class TimeoutAwareHttpServletRequest implements HttpServletRequest {
+
     private HttpServletRequest wr;
 
     TimeoutAwareHttpServletRequest(HttpServletRequest wrappedRequest) {
@@ -52,7 +52,7 @@ class TimeoutAwareHttpServletRequest implements HttpServletRequest {
             throw new IllegalStateException("Response already committed to client.");
         }
     }
-    
+
     @Override
     public synchronized String getAuthType() {
         checkAndThrow();
@@ -241,7 +241,8 @@ class TimeoutAwareHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public synchronized <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+    public synchronized <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass)
+            throws IOException, ServletException {
         checkAndThrow();
         return wr.upgrade(handlerClass);
     }

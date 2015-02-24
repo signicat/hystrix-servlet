@@ -102,7 +102,8 @@ public class AsyncWrapperServletTest {
 
     @Test
     public void require_That_RuntimeException_In_Wrapped_Servlet_Is_Handled_Correctly() throws Exception {
-        final AsyncTestServlet servlet = new AsyncTestServlet(new ExceptionThrowingServlet(new RuntimeException("Bananarama failed")), 10 * 1000L);
+        final AsyncTestServlet servlet = new AsyncTestServlet(
+                new ExceptionThrowingServlet(new RuntimeException("Bananarama failed")), 10 * 1000L);
         try (TestServer server = new TestServer(0, servlet)) {
             server.start();
             try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -125,7 +126,8 @@ public class AsyncWrapperServletTest {
 
     @Test
     public void require_That_IOException_In_Wrapped_Servlet_Is_Handled_Correctly() throws Exception {
-        final AsyncTestServlet servlet = new AsyncTestServlet(new ExceptionThrowingServlet(new IOException("Bananarama IO failed")), 10 * 1000L);
+        final AsyncTestServlet servlet = new AsyncTestServlet(
+                new ExceptionThrowingServlet(new IOException("Bananarama IO failed")), 10 * 1000L);
         try (TestServer server = new TestServer(0, servlet)) {
             server.start();
             try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
@@ -213,6 +215,7 @@ public class AsyncWrapperServletTest {
     }
 
     public static class AsyncTestServlet extends AsyncWrapperServlet {
+
         private final CountDownLatch servletComplete;
         private final CountDownLatch servletTimeout;
         private final CountDownLatch servletError;
@@ -311,8 +314,9 @@ public class AsyncWrapperServletTest {
             super.onHystrixNext(asyncContext, o);
         }
     }
-    
+
     public static class ExceptionThrowingServlet extends HttpServlet {
+
         private final Exception exceptionToThrow;
 
         public ExceptionThrowingServlet(Exception exceptionToThrow) {
@@ -337,6 +341,7 @@ public class AsyncWrapperServletTest {
     }
 
     public static class TimeoutServlet extends HttpServlet {
+
         private final CountDownLatch[] latchesToWaitForUntilReturning;
 
         public TimeoutServlet(final CountDownLatch... latchesToWaitForUntilReturning) {
@@ -367,6 +372,7 @@ public class AsyncWrapperServletTest {
     }
 
     public static class MockServlet extends HttpServlet {
+
         private boolean inited = false;
         private boolean destroyed = false;
         CountDownLatch servicedOnce = new CountDownLatch(1);
@@ -389,6 +395,7 @@ public class AsyncWrapperServletTest {
     }
 
     private static class TestServer implements AutoCloseable {
+
         private final Server server;
 
         private TestServer(final int port, HttpServlet servlet) {
@@ -404,7 +411,7 @@ public class AsyncWrapperServletTest {
         }
 
         public int getPort() {
-            return ((ServerConnector)server.getConnectors()[0]).getLocalPort();
+            return ((ServerConnector) server.getConnectors()[0]).getLocalPort();
         }
 
         @Override
