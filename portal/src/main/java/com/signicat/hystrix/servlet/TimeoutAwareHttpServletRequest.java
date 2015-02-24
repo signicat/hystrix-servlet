@@ -43,7 +43,7 @@ class TimeoutAwareHttpServletRequest implements HttpServletRequest {
         this.wr = wrappedRequest;
     }
 
-    public synchronized void resetWrapped() {
+    synchronized void resetWrapped() {
         this.wr = null;
     }
 

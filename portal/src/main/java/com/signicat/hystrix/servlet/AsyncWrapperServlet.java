@@ -46,7 +46,7 @@ public class AsyncWrapperServlet extends HttpServlet {
         HystrixPlugins.getInstance().registerMetricsPublisher(HystrixServoMetricsPublisher.getInstance());
     }
 
-    AsyncWrapperServlet(final HttpServlet wrappedServlet) {
+    public AsyncWrapperServlet(final HttpServlet wrappedServlet) {
         this(wrappedServlet, DEFAULT_TIMEOUT, DEFAULT_CORE_POOL_SIZE);
     }
 
@@ -68,7 +68,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    public void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         AsyncContext asyncContext = req.startAsync();
         asyncContext.setTimeout(timeoutMillis);
         TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq = new TimeoutAwareHttpServletRequest(req);
@@ -140,8 +140,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     /**
-     * Useful? for subclasses, but really mostly for testing. Be careful, exceptions thrown from here
-     * will mess things up. Note that this is called from
+     * Useful? for subclasses, but really mostly for testing. Note that this is called from
      * {@link com.signicat.hystrix.servlet.AsyncWrapperServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)},
      * i.e. by the servlet container thread.
      */
@@ -163,11 +162,11 @@ public class AsyncWrapperServlet extends HttpServlet {
         };
     }
 
-    public void servletComplete(AsyncEvent asyncEvent) throws IOException {
+    protected void servletComplete(AsyncEvent asyncEvent) throws IOException {
     }
 
     @SuppressWarnings({"EmptyCatchBlock", "ThrowableResultOfMethodCallIgnored"})
-    public void servletTimeout(AsyncEvent asyncEvent) throws IOException {
+    protected void servletTimeout(AsyncEvent asyncEvent) throws IOException {
         try {
             final String msg = "Timeout from async listener";
             log.log(Level.FINE, msg, asyncEvent.getThrowable());
@@ -183,7 +182,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings({"EmptyCatchBlock", "ThrowableResultOfMethodCallIgnored"})
-    public void servletError(AsyncEvent asyncEvent) throws IOException {
+    protected void servletError(AsyncEvent asyncEvent) throws IOException {
         try {
             final String msg = "Error from async listener";
             log.log(Level.WARNING, msg, asyncEvent.getThrowable());
@@ -199,7 +198,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings("EmptyCatchBlock")
-    public void hystrixCompleted(AsyncContext asyncContext) {
+    protected void hystrixCompleted(AsyncContext asyncContext) {
         try {
             asyncContext.complete();
         } catch (Exception e) {
@@ -207,7 +206,7 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings("EmptyCatchBlock")
-    public void hystrixError(AsyncContext asyncContext, Throwable throwable) {
+    protected void hystrixError(AsyncContext asyncContext, Throwable throwable) {
         try {
             final HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
             final String msg = "Error from async observer";
@@ -239,18 +238,18 @@ public class AsyncWrapperServlet extends HttpServlet {
     }
 
     @SuppressWarnings("EmptyCatchBlock")
-    public void hystrixNext(AsyncContext asyncContext, Object o) {
+    protected void hystrixNext(AsyncContext asyncContext, Object o) {
         try {
             asyncContext.complete();
         } catch (Exception e) {
         }
     }
 
-    public class BaseServletAsyncListener implements AsyncListener {
+    private class BaseServletAsyncListener implements AsyncListener {
         private final TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq;
         private final TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp;
 
-        public BaseServletAsyncListener(TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq,
+        private BaseServletAsyncListener(TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq,
                                         TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp) {
             this.timeoutAwareHttpServletReq = timeoutAwareHttpServletReq;
             this.timeoutAwareHttpServletResp = timeoutAwareHttpServletResp;
@@ -282,13 +281,13 @@ public class AsyncWrapperServlet extends HttpServlet {
         }
     }
 
-    public class BaseServletCommand extends HystrixCommand<Object> {
+    private class BaseServletCommand extends HystrixCommand<Object> {
         private final TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq;
         private final TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp;
         private final Runnable runBefore;
         private final Runnable runAfter;
 
-        public BaseServletCommand(Setter setter,
+        private BaseServletCommand(Setter setter,
                                   TimeoutAwareHttpServletRequest timeoutAwareHttpServletReq,
                                   TimeoutAwareHttpServletResponse timeoutAwareHttpServletResp,
                                   Runnable runBefore, Runnable runAfter) {
@@ -300,7 +299,7 @@ public class AsyncWrapperServlet extends HttpServlet {
         }
 
         @Override
-        protected Object run() throws Exception {
+        public Object run() throws Exception {
             try {
                 runBefore.run();
             } catch (Exception e) {
@@ -320,10 +319,10 @@ public class AsyncWrapperServlet extends HttpServlet {
         }
     }
 
-    public class BaseServletObserver implements Observer<Object> {
+    private class BaseServletObserver implements Observer<Object> {
         private final AsyncContext asyncContext;
 
-        public BaseServletObserver(AsyncContext asyncContext) {
+        private BaseServletObserver(AsyncContext asyncContext) {
             this.asyncContext = asyncContext;
         }
 

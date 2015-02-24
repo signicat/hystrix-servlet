@@ -28,7 +28,7 @@ class TimeoutAwareHttpServletResponse implements HttpServletResponse {
         this.wr = wrappedResponse;
     }
 
-    public synchronized void resetWrapped() {
+    synchronized void resetWrapped() {
         this.wr = null;
     }
 
