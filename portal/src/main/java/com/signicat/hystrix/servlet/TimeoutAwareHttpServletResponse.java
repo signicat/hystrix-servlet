@@ -264,4 +264,26 @@ class TimeoutAwareHttpServletResponse implements HttpServletResponse {
         checkAndThrow();
         return wr.getLocale();
     }
+
+    @Override
+    public synchronized boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TimeoutAwareHttpServletResponse)) {
+            return false;
+        }
+        TimeoutAwareHttpServletResponse that = (TimeoutAwareHttpServletResponse) o;
+        return !(wr != null ? !wr.equals(that.wr) : that.wr != null);
+    }
+
+    @Override
+    public synchronized int hashCode() {
+        return wr != null ? wr.hashCode() : 0;
+    }
+
+    @Override
+    public synchronized String toString() {
+        return this.getClass().getName() + " " + ((wr == null) ? "" : wr.toString());
+    }
 }

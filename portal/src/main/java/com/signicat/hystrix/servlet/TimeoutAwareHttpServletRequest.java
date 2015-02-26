@@ -470,4 +470,26 @@ class TimeoutAwareHttpServletRequest implements HttpServletRequest {
         checkAndThrow();
         return wr.getDispatcherType();
     }
+
+    @Override
+    public synchronized boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TimeoutAwareHttpServletRequest)) {
+            return false;
+        }
+        TimeoutAwareHttpServletRequest that = (TimeoutAwareHttpServletRequest) o;
+        return !(wr != null ? !wr.equals(that.wr) : that.wr != null);
+    }
+
+    @Override
+    public synchronized int hashCode() {
+        return wr != null ? wr.hashCode() : 0;
+    }
+
+    @Override
+    public synchronized String toString() {
+        return this.getClass().getName() + " " + ((wr == null) ? "" : wr.toString());
+    }
 }
