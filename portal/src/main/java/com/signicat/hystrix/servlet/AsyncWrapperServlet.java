@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -66,6 +67,11 @@ public class AsyncWrapperServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         wrappedServlet.init();
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        wrappedServlet.init(config);
     }
 
     @Override
