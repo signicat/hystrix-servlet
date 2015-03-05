@@ -50,10 +50,6 @@ public class AsyncWrapperServlet extends HttpServlet {
     private final long timeoutMillis;
     private final int corePoolSize;
 
-    static {
-        HystrixPlugins.getInstance().registerMetricsPublisher(HystrixServoMetricsPublisher.getInstance());
-    }
-
     public AsyncWrapperServlet(final HttpServlet wrappedServlet) {
         this(wrappedServlet, DEFAULT_TIMEOUT, DEFAULT_CORE_POOL_SIZE);
     }
@@ -64,18 +60,30 @@ public class AsyncWrapperServlet extends HttpServlet {
         this.corePoolSize = corePoolSize;
     }
 
+    private void registerMetricsPublisher() {
+        try {
+            HystrixPlugins.getInstance().registerMetricsPublisher(HystrixServoMetricsPublisher.getInstance());
+        } catch (IllegalStateException ignored) {
+        }
+    }
+
     @Override
     public void init() throws ServletException {
+        super.init();
+        registerMetricsPublisher();
         wrappedServlet.init();
     }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        registerMetricsPublisher();
         wrappedServlet.init(config);
     }
 
     @Override
     public void destroy() {
+        super.destroy();
         Hystrix.reset(5, TimeUnit.SECONDS);
         wrappedServlet.destroy();
     }
