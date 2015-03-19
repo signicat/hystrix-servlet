@@ -36,7 +36,7 @@ import rx.Observer;
  * request ends up executing within, make the wrapped servlet implement
  * {@link com.signicat.hystrix.servlet.HystrixAwareServlet#getCommandGroupKey(javax.servlet.http.HttpServletRequest)}.
  *
- * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
+ * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
  */
 @WebServlet(asyncSupported = true)
 public class AsyncWrapperServlet extends HttpServlet {

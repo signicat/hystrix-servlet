@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  * wrapper, and we call {@link #resetWrapped()} when the Servlet Container times out or completes. Any subsequent calls
  * to the Request or Response from the wrapped servlet will throw an exception.
  *
- * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
+ * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
  * @see TimeoutAwareHttpServletRequest
  */
 class TimeoutAwareHttpServletResponse implements HttpServletResponse {
