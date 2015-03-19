@@ -100,7 +100,9 @@ public class AsyncWrapperServlet extends HttpServlet {
         Runnable runAfter = onAfterCommandExecute();
 
         final String key = getCommandGroupKey(wrappedServlet, req);
-        log.info("Scheduling Hystrix command with key '" + key + "'");
+        final String path = req.getContextPath() + req.getServletPath() +
+                            (req.getPathInfo() == null ? "" : req.getPathInfo());
+        log.info("Scheduling Hystrix command with key '" + key + "' for path: '" + path + "'.");
 
         //double thread pool size for pool with magic name 'default'
         final int size = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
@@ -276,7 +278,7 @@ public class AsyncWrapperServlet extends HttpServlet {
                 HystrixRuntimeException hre = (HystrixRuntimeException) throwable;
                 switch (hre.getFailureType()) {
                     case TIMEOUT:
-                        log.debug(msg, throwable);
+                        log.debug("Timeout from async observer", throwable);
                         response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT, msg);
                         break;
                     case COMMAND_EXCEPTION:
@@ -373,6 +375,16 @@ public class AsyncWrapperServlet extends HttpServlet {
 
         @Override
         public Object run() throws Exception {
+            String path;
+            try {
+                path = timeoutAwareHttpServletReq.getContextPath() +
+                       timeoutAwareHttpServletReq.getServletPath() +
+                       (timeoutAwareHttpServletReq.getPathInfo() == null ?
+                        "" : timeoutAwareHttpServletReq.getPathInfo());
+            } catch (Exception e) {
+                path = "(unknown, timed out?)";
+            }
+            log.debug("Hystrix command begun execution (path: '" + path + "').");
             try {
                 runBefore.run();
             } catch (Exception e) {
@@ -382,6 +394,7 @@ public class AsyncWrapperServlet extends HttpServlet {
             try {
                 wrappedServlet.service(timeoutAwareHttpServletReq, timeoutAwareHttpServletResp);
             } finally {
+                log.debug("Hystrix command finished execution (path: '" + path + "').");
                 try {
                     runAfter.run();
                 } catch (Exception e) {
