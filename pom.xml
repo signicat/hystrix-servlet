@@ -2,7 +2,7 @@
 
     <name>Hystrix Servlet Integration</name>
     <artifactId>hystrix-servlet</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
@@ -83,6 +83,6 @@
 
     <scm>
         <connection>scm:git:ssh://git@git.signicat.net/sub/hystrix-servlet.git</connection>
-        <tag>HEAD</tag>
+        <tag>hystrix-servlet-1.0.1</tag>
     </scm>
 </project>
