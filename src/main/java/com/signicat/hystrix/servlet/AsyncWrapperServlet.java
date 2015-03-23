@@ -55,6 +55,10 @@ public class AsyncWrapperServlet extends HttpServlet {
             HystrixPlugins.getInstance().registerMetricsPublisher(HystrixServoMetricsPublisher.getInstance());
         } catch (IllegalStateException ignored) {
         }
+        try {
+            HystrixPlugins.getInstance().registerConcurrencyStrategy(ConcurrencyStrategyWithExplicitCoreSize.getInstance());
+        } catch (IllegalStateException ignored) {
+        }
     }
 
     public AsyncWrapperServlet(final HttpServlet wrappedServlet) {
@@ -106,8 +110,8 @@ public class AsyncWrapperServlet extends HttpServlet {
 
         //double thread pool size for pool with magic name 'default'
         final int size = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
-        final int queueSize = corePoolSize * 4;
-        final int queueRejectionSize = corePoolSize * 2;
+        final int queueSize = (int) (((double) corePoolSize) * 1.4d);
+        final int queueRejectionSize = (int) (((double) corePoolSize) * 1.2d);
 
         BaseServletCommand command =
                 new BaseServletCommand(
@@ -122,11 +126,13 @@ public class AsyncWrapperServlet extends HttpServlet {
                                                 .withCircuitBreakerEnabled(false)
                                                 .withExecutionIsolationStrategy(
                                                         HystrixCommandProperties.ExecutionIsolationStrategy.THREAD)
-                                                .withFallbackEnabled(false))
+                                                .withFallbackEnabled(false)
+                                                .withRequestLogEnabled(false))
                                 .andThreadPoolPropertiesDefaults(
                                         HystrixThreadPoolProperties.Setter()
                                                 .withCoreSize(size)
                                                 .withMaxQueueSize(queueSize)
+                                                .withKeepAliveTimeMinutes(1)
                                                 .withQueueSizeRejectionThreshold(queueRejectionSize)),
                         timeoutAwareHttpServletReq,
                         timeoutAwareHttpServletResp,
