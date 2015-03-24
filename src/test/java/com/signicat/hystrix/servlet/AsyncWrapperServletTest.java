@@ -28,7 +28,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
+ * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
  */
 public class AsyncWrapperServletTest {
 

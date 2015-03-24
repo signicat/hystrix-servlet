@@ -29,7 +29,7 @@ import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 /**
- * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
+ * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 

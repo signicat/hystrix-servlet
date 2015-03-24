@@ -14,7 +14,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
- * @author Einar Rosenvinge &lt;einros@signicat.com&gt;
+ * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
  */
 public class TimeoutAwareHttpServletRequestTest {
 
