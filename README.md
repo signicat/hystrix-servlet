@@ -213,8 +213,7 @@ the javadoc). After this *we do not want the Hystrix thread to tamper with the o
 `HttpServletResponse`*. This is accomplished by giving the Hystrix thread a wrapped request and response in the first
 place, and when timeout happens, we poke the wrapper so that access to the original request and response is prevented.
 This is suboptimally implemented and not waterproof. Suboptimal in the sense that all methods in
-`com.signicat.hystrix.servlet.TimeoutAwareHttpServletRequest` and
-`com.signicat.hystrix.servlet.TimeoutAwareHttpServletResponse` are synchronized. Not waterproof in the sense that
-objects *returned* from the `HttpServletRequest` or `HttpServletResponse` are *not* wrapped - so if something
+`TimeoutAwareHttpServletRequest` and `TimeoutAwareHttpServletResponse` are synchronized. Not waterproof in the sense
+that objects *returned* from the `HttpServletRequest` or `HttpServletResponse` are *not* wrapped - so if something
 somewhere has cached a reference to e.g. a `Writer` (returned from `HttpServletResponse.getWriter()`) early on,
 this can still be (ab)used by the Hystrix thread post-timeout.
