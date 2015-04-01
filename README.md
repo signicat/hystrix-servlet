@@ -98,8 +98,8 @@ Add a dependency towards `hystrix-servlet` to your `pom.xml`:
         <scope>compile</scope>
     </dependency>
 
-The Servlets that you wish to execute within a separate thread pool, create a wrapper class alongside the
-current Servlet class:
+The Servlets that you wish to execute within a separate thread pool (e.g. `SomethingServlet`), create a wrapper class
+alongside the current Servlet class:
 
     package com.foo;
     import javax.servlet.annotation.WebServlet;
@@ -191,3 +191,30 @@ The solution for the second case is essentially the same as for the first, but I
 
 # Limitations
 
+In real life, a Servlet will not only communicate with *one* back-end service, but several. If
+FooServlet calls towards back-end services B1, B2 and B3, which thread pool should one run requests towards
+FooServlet within? With Hystrix-Servlet, you have to "just" make a choice, which is not necessarily easy.
+
+In cases like this, the partial overlaps of back-end access will mess up thread-pool isolation.
+
+A better solution would be to push Hystrix further down the stack, and wrap the back-end communication
+libraries themselves.
+
+Hystrix allows setting various parameters when creating a `HystrixCommand`, but setting these is not
+available through Hystrix-Servlet. The only knobs for use are the command group key (thread pool name, as shown above),
+command timeout (in milliseconds), and thread pool size. The latter two are available as constructor arguments
+to `AsyncWrapperServlet`.
+
+A few words regarding timeout handling. Assume that an operation in a running Hystrix thread takes forever.
+Hystrix-Servlet will let the Servlet container time things out first (i.e. use the timeout given as a constructor
+argument to `AsyncWrapperServlet`, or the default of 50 seconds). In this case `AsyncWrapperServlet.onServletTimeout()`
+is called, which by default returns a HTTP 504 to the end user (this method can be overridden, but make sure to read
+the javadoc). After this *we do not want the Hystrix thread to tamper with the original `HttpServletRequest` or
+`HttpServletResponse`*. This is accomplished by giving the Hystrix thread a wrapped request and response in the first
+place, and when timeout happens, we poke the wrapper so that access to the original request and response is prevented.
+This is suboptimally implemented and not waterproof. Suboptimal in the sense that all methods in
+`com.signicat.hystrix.servlet.TimeoutAwareHttpServletRequest` and
+`com.signicat.hystrix.servlet.TimeoutAwareHttpServletResponse` are synchronized. Not waterproof in the sense that
+objects *returned* from the `HttpServletRequest` or `HttpServletResponse` are *not* wrapped - so if something
+somewhere has cached a reference to e.g. a `Writer` (returned from `HttpServletResponse.getWriter()`) early on,
+this can still be (ab)used by the Hystrix thread post-timeout.
