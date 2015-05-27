@@ -2,15 +2,34 @@
 
     <name>Hystrix Servlet Integration</name>
     <artifactId>hystrix-servlet</artifactId>
+    <groupId>com.signicat.services</groupId>
     <version>1.0.2-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
-    <parent>
-        <groupId>com.signicat.services</groupId>
-        <artifactId>base-pom</artifactId>
-        <version>5</version>
-    </parent>
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
+
+    <properties>
+        <project.build.sourceEncoding>US-ASCII</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>US-ASCII</project.reporting.outputEncoding>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>Signicat internal release repository</name>
+            <layout>default</layout>
+            <url>http://nexus.signicat.net/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>Signicat internal snapshot repository</name>
+            <layout>default</layout>
+            <url>http://nexus.signicat.net/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
 
@@ -77,6 +96,21 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <encoding>US-ASCII</encoding>
+                    <compilerVersion>1.7</compilerVersion>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <debug>true</debug>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                </configuration>
             </plugin>
         </plugins>
     </build>
