@@ -165,6 +165,8 @@ public class AsyncWrapperServlet extends HttpServlet {
      * javax.servlet.http.HttpServletResponse)}, i.e. by the servlet container thread. The Runnable returned is called
      * by the Hystrix thread (in a try-catch block, with logging), at the beginning of
      * {@link com.netflix.hystrix.HystrixCommand#run()}.
+     *
+     * @return a Runnable called by a Hystrix thread, at the beginning of HystrixCommand.run().
      */
     protected Runnable onBeforeCommandSubmit() {
         return new Runnable() {
@@ -188,6 +190,8 @@ public class AsyncWrapperServlet extends HttpServlet {
      * javax.servlet.http.HttpServletResponse)}, i.e. by the servlet container thread. The Runnable returned is called
      * by the Hystrix thread (in a try-catch block, with logging, inside a finally block), at the end of {@link
      * com.netflix.hystrix.HystrixCommand#run()}.
+     *
+     * @return a Runnable called by a Hystrix thread, at the end of HystrixCommand.run().
      */
     protected Runnable onAfterCommandExecute() {
         return new Runnable() {
