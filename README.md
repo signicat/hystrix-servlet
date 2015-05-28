@@ -85,7 +85,7 @@ Now note that
 
 # Quick-Start Guide
 
-This assumes that you already have a working web application with a `web.xml` file.
+This assumes that you already have a working web application with a `web.xml` file.  See also [Javadoc](http://signicat.github.io/hystrix-servlet/apidocs/).
 
 ## Initial Setup
 
@@ -132,7 +132,7 @@ Now, one might want to
 
 Both are supported.
 
-For the first case, quite simply let your `SomethingServlet` implement the interface `com.signicat.hystrix.servlet.HystrixAwareServlet`:
+For the first case, quite simply let your `SomethingServlet` implement the interface [`com.signicat.hystrix.servlet.HystrixAwareServlet`](http://signicat.github.io/hystrix-servlet/apidocs/com/signicat/hystrix/servlet/HystrixAwareServlet.html):
 
     package com.foo;
     import com.signicat.hystrix.servlet.HystrixAwareServlet;
@@ -203,11 +203,12 @@ libraries themselves.
 Hystrix allows setting various parameters when creating a `HystrixCommand`, but setting these is not
 available through Hystrix-Servlet. The only knobs for use are the command group key (thread pool name, as shown above),
 command timeout (in milliseconds), and thread pool size. The latter two are available as constructor arguments
-to `AsyncWrapperServlet`.
+to [`AsyncWrapperServlet`](http://signicat.github.io/hystrix-servlet/apidocs/com/signicat/hystrix/servlet/AsyncWrapperServlet.html).
 
 A few words regarding timeout handling. Assume that an operation in a running Hystrix thread takes forever.
 Hystrix-Servlet will let the Servlet container time things out first (i.e. use the timeout given as a constructor
-argument to `AsyncWrapperServlet`, or the default of 50 seconds). In this case `AsyncWrapperServlet.onServletTimeout()`
+argument to [`AsyncWrapperServlet`](http://signicat.github.io/hystrix-servlet/apidocs/com/signicat/hystrix/servlet/AsyncWrapperServlet.html),
+or the default of 50 seconds). In this case [`AsyncWrapperServlet.onServletTimeout()`](http://signicat.github.io/hystrix-servlet/apidocs/com/signicat/hystrix/servlet/AsyncWrapperServlet.html#onServletTimeout-javax.servlet.AsyncEvent-)
 is called, which by default returns a HTTP 504 to the end user (this method can be overridden, but make sure to read
 the javadoc). After this *we do not want the Hystrix thread to tamper with the original `HttpServletRequest` or
 `HttpServletResponse`*. This is accomplished by giving the Hystrix thread a wrapped request and response in the first
