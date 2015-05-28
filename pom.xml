@@ -2,7 +2,7 @@
 
     <name>Hystrix Servlet Integration</name>
     <artifactId>hystrix-servlet</artifactId>
-    <groupId>com.signicat.services</groupId>
+    <groupId>com.signicat.hystrix</groupId>
     <version>1.0.2-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
