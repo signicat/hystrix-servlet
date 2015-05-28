@@ -92,9 +92,9 @@ This assumes that you already have a working web application with a `web.xml` fi
 Add a dependency towards `hystrix-servlet` to your `pom.xml`:
 
     <dependency>
-        <groupId>com.signicat.services</groupId>
+        <groupId>com.signicat.hystrix</groupId>
         <artifactId>hystrix-servlet</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
         <scope>compile</scope>
     </dependency>
 
