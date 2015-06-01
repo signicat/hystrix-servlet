@@ -14,6 +14,9 @@
     <properties>
         <project.build.sourceEncoding>US-ASCII</project.build.sourceEncoding>
         <project.reporting.outputEncoding>US-ASCII</project.reporting.outputEncoding>
+        <label>${env.BUILD_NUMBER}</label>
+        <buildtag>${env.BUILD_TAG}</buildtag>
+        <buildid>${env.BUILD_ID}</buildid>
     </properties>
 
     <distributionManagement>
@@ -90,24 +93,17 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.4.1</version>
-                <configuration>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
                 <inherited>true</inherited>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -118,12 +114,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.5</version>
+                    <version>2.6.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
+                    <version>3.3</version>
                     <inherited>true</inherited>
                     <configuration>
                         <encoding>US-ASCII</encoding>
@@ -138,29 +134,34 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.8.1</version>
+                    <version>2.8.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.1</version>
+                    <version>2.5.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>2.7</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.16</version>
+                    <version>2.18.1</version>
                 </plugin>
 
                 <!-- Packaging types / tools -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>2.6</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -179,18 +180,18 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.9.1</version>
+                    <version>2.10.3</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.4.1</version>
+                    <version>2.5.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
+                    <version>2.4</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -198,25 +199,34 @@
 
     <profiles>
         <profile>
-            <id>release</id>
+            <id>jenkins</id>
+            <activation>
+                <property>
+                    <name>user.name</name>
+                    <value>jenkins</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-source-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>attach-sources</id>
+                                <id>javadoc</id>
+                                <phase>process-sources</phase>
                                 <goals>
-                                    <goal>jar</goal>
+                                    <goal>javadoc</goal>
                                 </goals>
                             </execution>
                         </executions>
                     </plugin>
                     <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>attach-javadocs</id>
+                                <id>attach-sources</id>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
@@ -234,4 +244,5 @@
         <url>https://github.com/signicat/hystrix-servlet</url>
         <tag>HEAD</tag>
     </scm>
+
 </project>
