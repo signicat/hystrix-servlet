@@ -21,6 +21,10 @@
             <id>bintray</id>
             <url>https://api.bintray.com/maven/signicat/maven/hystrix-servlet</url>
         </repository>
+        <snapshotRepository>
+            <id>tmpfile</id>
+            <url>file:///tmp/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <dependencies>
