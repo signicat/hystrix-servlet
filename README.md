@@ -218,3 +218,4 @@ This is suboptimally implemented and not waterproof. Suboptimal in the sense tha
 that objects *returned* from the `HttpServletRequest` or `HttpServletResponse` are *not* wrapped - so if something
 somewhere has cached a reference to e.g. a `Writer` (returned from `HttpServletResponse.getWriter()`) early on,
 this can still be (ab)used by the Hystrix thread post-timeout.
+
