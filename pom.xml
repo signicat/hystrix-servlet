@@ -5,7 +5,7 @@
     <url>https://github.com/signicat/hystrix-servlet</url>
     <artifactId>hystrix-servlet</artifactId>
     <groupId>com.signicat.hystrix</groupId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.6</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
@@ -263,7 +263,7 @@
         <connection>scm:git:https://github.com/signicat/hystrix-servlet.git</connection>
         <developerConnection>scm:git:git@github.com:signicat/hystrix-servlet.git</developerConnection>
         <url>https://github.com/signicat/hystrix-servlet</url>
-        <tag>HEAD</tag>
+        <tag>hystrix-servlet-1.0.6</tag>
     </scm>
 
 </project>
