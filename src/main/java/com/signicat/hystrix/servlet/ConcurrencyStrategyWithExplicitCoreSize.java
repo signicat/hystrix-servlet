@@ -8,6 +8,7 @@
 package com.signicat.hystrix.servlet;
 
 import com.netflix.hystrix.HystrixThreadPoolKey;
+import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.strategy.concurrency.HystrixConcurrencyStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 
@@ -19,9 +20,7 @@ import java.util.concurrent.TimeUnit;
  * Concurrency strategy which specifies an explicit core pool size. This is needed
  * because {@link com.netflix.hystrix.HystrixThreadPool.HystrixThreadPoolDefault} calls {@link
  * com.netflix.hystrix.strategy.concurrency.HystrixConcurrencyStrategy#getThreadPool(com.netflix.hystrix.HystrixThreadPoolKey,
- * com.netflix.hystrix.strategy.properties.HystrixProperty, com.netflix.hystrix.strategy.properties.HystrixProperty,
- * com.netflix.hystrix.strategy.properties.HystrixProperty, java.util.concurrent.TimeUnit,
- * java.util.concurrent.BlockingQueue)} with {@link com.netflix.hystrix.HystrixThreadPoolProperties#coreSize()} for BOTH
+ * com.netflix.hystrix.HystrixThreadPoolProperties)} with {@link com.netflix.hystrix.HystrixThreadPoolProperties#coreSize()} for BOTH
  * size arguments, meaning that thread pools by default have a fixed size.
  *
  * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
@@ -38,6 +37,8 @@ public class ConcurrencyStrategyWithExplicitCoreSize extends HystrixConcurrencyS
         return INSTANCE;
     }
 
+    // this might be worth keeping around if we ever decide to switch out HystrixThreadPoolDefault
+    // with an implementation that requires this overloaded variant
     @Override
     public ThreadPoolExecutor getThreadPool(final HystrixThreadPoolKey threadPoolKey,
                                             final HystrixProperty<Integer> corePoolSize,
@@ -54,6 +55,18 @@ public class ConcurrencyStrategyWithExplicitCoreSize extends HystrixConcurrencyS
                                                           keepAliveTime, unit, workQueue);
         executor.allowCoreThreadTimeOut(true);
         executor.prestartAllCoreThreads();
+        return executor;
+    }
+
+    @Override
+    public ThreadPoolExecutor getThreadPool(HystrixThreadPoolKey threadPoolKey,
+                                            HystrixThreadPoolProperties threadPoolProperties) {
+        // not performing the minPoolSize check as above, as this is already done in the superclass
+        ThreadPoolExecutor executor = super.getThreadPool(threadPoolKey, threadPoolProperties);
+
+        executor.allowCoreThreadTimeOut(true);
+        executor.prestartAllCoreThreads();
+
         return executor;
     }
 }

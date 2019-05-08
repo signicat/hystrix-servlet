@@ -64,13 +64,13 @@
         <dependency>
             <groupId>com.netflix.hystrix</groupId>
             <artifactId>hystrix-core</artifactId>
-            <version>1.3.20</version>
+            <version>1.5.18</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.netflix.hystrix</groupId>
             <artifactId>hystrix-servo-metrics-publisher</artifactId>
-            <version>1.3.20</version>
+            <version>1.5.18</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

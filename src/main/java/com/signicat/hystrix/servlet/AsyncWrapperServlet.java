@@ -128,7 +128,7 @@ public class AsyncWrapperServlet extends HttpServlet {
                                 .andCommandKey(HystrixCommandKey.Factory.asKey(key))
                                 .andCommandPropertiesDefaults(
                                         HystrixCommandProperties.Setter()
-                                                .withExecutionIsolationThreadTimeoutInMilliseconds(
+                                                .withExecutionTimeoutInMilliseconds(
                                                         (int) timeoutMillis + HYSTRIX_ADDED_TIMEOUT_DELAY)
                                                 .withCircuitBreakerEnabled(false)
                                                 .withExecutionIsolationStrategy(
