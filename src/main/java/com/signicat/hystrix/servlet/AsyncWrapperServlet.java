@@ -103,14 +103,12 @@ public class AsyncWrapperServlet extends HttpServlet {
                 (req.getPathInfo() == null ? "" : req.getPathInfo());
         log.info("Scheduling Hystrix command with key '" + key + "' for path: '" + path + "'.");
 
-
-        // this is the old behaviour, just made completely clear
-        // it's pretty weird
-
         // double thread pool size for pool with magic name 'default'
         int aSize = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
         int bSize = 10;
 
+        // this is the old behaviour, just made completely clear
+        // it's pretty weird
         final int coreSize    = Math.min(aSize, bSize);
         final int maximumSize = Math.max(aSize, bSize);
         final int queueSize          = (int) (((double) corePoolSize) * 1.4d);
