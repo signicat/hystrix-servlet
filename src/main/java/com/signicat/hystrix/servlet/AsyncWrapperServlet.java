@@ -105,7 +105,7 @@ public class AsyncWrapperServlet extends HttpServlet {
 
         // this is the old behaviour, just made completely clear
         // it's a little weird
-        // (note how core size is not really core size at all)
+        // (note how coreSize is not really corePoolSize size at all)
 
         // double thread pool size for pool with magic name 'default'
         int maximumSize = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? corePoolSize*2 : corePoolSize;
