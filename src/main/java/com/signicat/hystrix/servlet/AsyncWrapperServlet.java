@@ -111,9 +111,9 @@ public class AsyncWrapperServlet extends HttpServlet {
         int aSize = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
         int bSize = 10;
 
-        final int coreSize = Math.min(aSize, bSize);
+        final int coreSize    = Math.min(aSize, bSize);
         final int maximumSize = Math.max(aSize, bSize);
-        final int queueSize = (int) (((double) corePoolSize) * 1.4d);
+        final int queueSize          = (int) (((double) corePoolSize) * 1.4d);
         final int queueRejectionSize = (int) (((double) corePoolSize) * 1.2d);
 
         BaseServletCommand command =
