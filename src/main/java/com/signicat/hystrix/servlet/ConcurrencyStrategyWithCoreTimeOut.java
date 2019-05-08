@@ -17,23 +17,20 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Concurrency strategy which specifies an explicit core pool size. This is needed
- * because {@link com.netflix.hystrix.HystrixThreadPool.HystrixThreadPoolDefault} calls {@link
- * com.netflix.hystrix.strategy.concurrency.HystrixConcurrencyStrategy#getThreadPool(com.netflix.hystrix.HystrixThreadPoolKey,
- * com.netflix.hystrix.HystrixThreadPoolProperties)} with {@link com.netflix.hystrix.HystrixThreadPoolProperties#coreSize()} for BOTH
- * size arguments, meaning that thread pools by default have a fixed size.
+ * Concurrency strategy that ensures core threads are allowed to time out
+ * as well as prestarting said core threads.
  *
  * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
  */
-public class ConcurrencyStrategyWithExplicitCoreSize extends HystrixConcurrencyStrategy {
+public class ConcurrencyStrategyWithCoreTimeOut extends HystrixConcurrencyStrategy {
 
-    private static final ConcurrencyStrategyWithExplicitCoreSize INSTANCE =
-            new ConcurrencyStrategyWithExplicitCoreSize();
+    private static final ConcurrencyStrategyWithCoreTimeOut INSTANCE =
+            new ConcurrencyStrategyWithCoreTimeOut();
 
-    private ConcurrencyStrategyWithExplicitCoreSize() {
+    private ConcurrencyStrategyWithCoreTimeOut() {
     }
 
-    public static ConcurrencyStrategyWithExplicitCoreSize getInstance() {
+    public static ConcurrencyStrategyWithCoreTimeOut getInstance() {
         return INSTANCE;
     }
 
