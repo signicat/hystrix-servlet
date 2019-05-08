@@ -63,7 +63,7 @@ public class AsyncWrapperServlet extends HttpServlet {
         } catch (IllegalStateException ignored) {
         }
         try {
-            HystrixPlugins.getInstance().registerConcurrencyStrategy(ConcurrencyStrategyWithExplicitCoreSize.getInstance());
+            HystrixPlugins.getInstance().registerConcurrencyStrategy(ConcurrencyStrategyWithCoreTimeOut.getInstance());
         } catch (IllegalStateException ignored) {
         }
     }
