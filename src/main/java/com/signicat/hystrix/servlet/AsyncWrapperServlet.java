@@ -7,34 +7,22 @@
  */
 package com.signicat.hystrix.servlet;
 
-import com.netflix.hystrix.Hystrix;
-import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommandGroupKey;
-import com.netflix.hystrix.HystrixCommandKey;
-import com.netflix.hystrix.HystrixCommandProperties;
-import com.netflix.hystrix.HystrixThreadPoolProperties;
+import com.netflix.hystrix.*;
 import com.netflix.hystrix.contrib.servopublisher.HystrixServoMetricsPublisher;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.netflix.hystrix.strategy.HystrixPlugins;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observable;
+import rx.Observer;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import rx.Observable;
-import rx.Observer;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Wrapper class for executing any {@link javax.servlet.http.HttpServlet} within a Hystrix thread pool. Subclass this,
@@ -112,16 +100,18 @@ public class AsyncWrapperServlet extends HttpServlet {
 
         final String key = getCommandGroupKey(wrappedServlet, req);
         final String path = req.getContextPath() + req.getServletPath() +
-                            (req.getPathInfo() == null ? "" : req.getPathInfo());
+                (req.getPathInfo() == null ? "" : req.getPathInfo());
         log.info("Scheduling Hystrix command with key '" + key + "' for path: '" + path + "'.");
 
 
-        // this is the old behaviour, just made clear, it's pretty weird
+        // this is the old behaviour, just made completely clear
+        // it's pretty weird
 
+        // double thread pool size for pool with magic name 'default'
         int aSize = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
         int bSize = 10;
 
-        final int coreSize    = Math.min(aSize, bSize);
+        final int coreSize = Math.min(aSize, bSize);
         final int maximumSize = Math.max(aSize, bSize);
         final int queueSize = (int) (((double) corePoolSize) * 1.4d);
         final int queueRejectionSize = (int) (((double) corePoolSize) * 1.2d);
@@ -134,21 +124,19 @@ public class AsyncWrapperServlet extends HttpServlet {
                                 .andCommandKey(HystrixCommandKey.Factory.asKey(key))
                                 .andCommandPropertiesDefaults(
                                         HystrixCommandProperties.Setter()
-                                                .withExecutionTimeoutInMilliseconds(
-                                                        (int) timeoutMillis + HYSTRIX_ADDED_TIMEOUT_DELAY)
-                                                .withCircuitBreakerEnabled(false)
-                                                .withExecutionIsolationStrategy(
-                                                        HystrixCommandProperties.ExecutionIsolationStrategy.THREAD)
-                                                .withFallbackEnabled(false)
-                                                .withRequestLogEnabled(false))
+                                                                .withExecutionTimeoutInMilliseconds((int) timeoutMillis + HYSTRIX_ADDED_TIMEOUT_DELAY)
+                                                                .withCircuitBreakerEnabled(false)
+                                                                .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.THREAD)
+                                                                .withFallbackEnabled(false)
+                                                                .withRequestLogEnabled(false))
                                 .andThreadPoolPropertiesDefaults(
                                         HystrixThreadPoolProperties.Setter()
-                                                .withAllowMaximumSizeToDivergeFromCoreSize(true)
-                                                .withCoreSize(coreSize)
-                                                .withMaximumSize(maximumSize)
-                                                .withMaxQueueSize(queueSize)
-                                                .withKeepAliveTimeMinutes(1)
-                                                .withQueueSizeRejectionThreshold(queueRejectionSize)),
+                                                                   .withAllowMaximumSizeToDivergeFromCoreSize(true)
+                                                                   .withCoreSize(coreSize)
+                                                                   .withMaximumSize(maximumSize)
+                                                                   .withMaxQueueSize(queueSize)
+                                                                   .withKeepAliveTimeMinutes(1)
+                                                                   .withQueueSizeRejectionThreshold(queueRejectionSize)),
                         timeoutAwareHttpServletReq,
                         timeoutAwareHttpServletResp,
                         runBefore,
@@ -403,9 +391,9 @@ public class AsyncWrapperServlet extends HttpServlet {
             String path;
             try {
                 path = timeoutAwareHttpServletReq.getContextPath() +
-                       timeoutAwareHttpServletReq.getServletPath() +
-                       (timeoutAwareHttpServletReq.getPathInfo() == null ?
-                        "" : timeoutAwareHttpServletReq.getPathInfo());
+                        timeoutAwareHttpServletReq.getServletPath() +
+                        (timeoutAwareHttpServletReq.getPathInfo() == null ?
+                                "" : timeoutAwareHttpServletReq.getPathInfo());
             } catch (Exception e) {
                 path = "(unknown, timed out?)";
             }

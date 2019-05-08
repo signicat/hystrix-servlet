@@ -19,5 +19,5 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface HystrixAwareServlet {
 
-    public String getCommandGroupKey(HttpServletRequest request);
+    String getCommandGroupKey(HttpServletRequest request);
 }

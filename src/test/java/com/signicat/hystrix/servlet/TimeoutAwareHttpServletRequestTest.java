@@ -9,11 +9,10 @@ package com.signicat.hystrix.servlet;
 
 import org.junit.Test;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.TimeUnit;
-
-import javax.servlet.ServletException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;

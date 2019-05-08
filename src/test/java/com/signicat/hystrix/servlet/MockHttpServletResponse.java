@@ -7,15 +7,14 @@
  */
 package com.signicat.hystrix.servlet;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Einar Rosenvinge &lt;einarmr@gmail.com&gt;
