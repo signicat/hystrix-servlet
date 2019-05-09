@@ -94,7 +94,7 @@ Add a dependency towards `hystrix-servlet` to your `pom.xml`:
     <dependency>
         <groupId>com.signicat.hystrix</groupId>
         <artifactId>hystrix-servlet</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.11</version>
         <scope>compile</scope>
     </dependency>
 
