@@ -8,6 +8,7 @@
 package com.signicat.hystrix.servlet;
 
 import com.netflix.hystrix.HystrixThreadPoolKey;
+import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.strategy.concurrency.HystrixConcurrencyStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 
@@ -45,15 +46,28 @@ public class ConcurrencyStrategyWithExplicitCoreSize extends HystrixConcurrencyS
                                             final HystrixProperty<Integer> keepAliveTime,
                                             final TimeUnit unit,
                                             final BlockingQueue<Runnable> workQueue) {
-        int minPoolSize = 10;
-        minPoolSize = (minPoolSize < maximumPoolSize.get()) ? minPoolSize : maximumPoolSize.get();
-
         ThreadPoolExecutor executor = super.getThreadPool(threadPoolKey,
-                                                          HystrixProperty.Factory.asProperty(minPoolSize),
+                                                          corePoolSize,
                                                           maximumPoolSize,
-                                                          keepAliveTime, unit, workQueue);
+                                                          keepAliveTime,
+                                                          unit,
+                                                          workQueue);
+
         executor.allowCoreThreadTimeOut(true);
         executor.prestartAllCoreThreads();
+
+        return executor;
+    }
+
+    @Override
+    public ThreadPoolExecutor getThreadPool(HystrixThreadPoolKey threadPoolKey,
+                                            HystrixThreadPoolProperties threadPoolProperties) {
+        ThreadPoolExecutor executor = super.getThreadPool(threadPoolKey,
+                                                          threadPoolProperties);
+
+        executor.allowCoreThreadTimeOut(true);
+        executor.prestartAllCoreThreads();
+
         return executor;
     }
 }
