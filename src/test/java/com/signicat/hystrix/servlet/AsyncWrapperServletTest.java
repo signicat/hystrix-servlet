@@ -173,7 +173,7 @@ public class AsyncWrapperServletTest {
                     EntityUtils.consume(httpResponse.getEntity());
                     assertThat(servlet.servletComplete.await(60, TimeUnit.SECONDS), is(true));
                     assertThat(servlet.servletTimeout.getCount(), equalTo(1L));
-                    assertThat(servlet.servletError.getCount(), equalTo(1L));
+                    assertThat(servlet.servletError.await(60, TimeUnit.SECONDS), is(true));
                     assertThat(servlet.hystrixError.getCount(), equalTo(1L));
                     assertThat(servlet.hystrixCompleted.getCount(), equalTo(1L));
                     assertThat(servlet.hystrixNext.getCount(), equalTo(1L));

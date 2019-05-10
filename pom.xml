@@ -76,13 +76,13 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.2.7.v20150116</version>
+            <version>9.4.18.v20190429</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.2.7.v20150116</version>
+            <version>9.4.18.v20190429</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -144,9 +144,9 @@
                     <inherited>true</inherited>
                     <configuration>
                         <encoding>US-ASCII</encoding>
-                        <compilerVersion>1.7</compilerVersion>
-                        <source>1.7</source>
-                        <target>1.7</target>
+                        <compilerVersion>1.8</compilerVersion>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <debug>true</debug>
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
