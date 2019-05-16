@@ -63,7 +63,7 @@ public class AsyncWrapperServlet extends HttpServlet {
         } catch (IllegalStateException ignored) {
         }
         try {
-            HystrixPlugins.getInstance().registerConcurrencyStrategy(ConcurrencyStrategyWithExplicitCoreSize.getInstance());
+            HystrixPlugins.getInstance().registerConcurrencyStrategy(ConcurrencyStrategyWithCoreTimeOut.getInstance());
         } catch (IllegalStateException ignored) {
         }
     }
@@ -116,8 +116,8 @@ public class AsyncWrapperServlet extends HttpServlet {
         log.info("Scheduling Hystrix command with key '" + key + "' for path: '" + path + "'.");
 
         //double thread pool size for pool with magic name 'default'
-        final int size = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
-        final int queueSize = (int) (((double) corePoolSize) * 1.4d);
+        final int coreSize = DEFAULT_COMMAND_GROUP_KEY.equals(key) ? (corePoolSize * 2) : corePoolSize;
+        final int queueSize          = (int) (((double) corePoolSize) * 1.4d);
         final int queueRejectionSize = (int) (((double) corePoolSize) * 1.2d);
 
         BaseServletCommand command =
@@ -128,7 +128,7 @@ public class AsyncWrapperServlet extends HttpServlet {
                                 .andCommandKey(HystrixCommandKey.Factory.asKey(key))
                                 .andCommandPropertiesDefaults(
                                         HystrixCommandProperties.Setter()
-                                                .withExecutionIsolationThreadTimeoutInMilliseconds(
+                                                .withExecutionTimeoutInMilliseconds(
                                                         (int) timeoutMillis + HYSTRIX_ADDED_TIMEOUT_DELAY)
                                                 .withCircuitBreakerEnabled(false)
                                                 .withExecutionIsolationStrategy(
@@ -137,7 +137,7 @@ public class AsyncWrapperServlet extends HttpServlet {
                                                 .withRequestLogEnabled(false))
                                 .andThreadPoolPropertiesDefaults(
                                         HystrixThreadPoolProperties.Setter()
-                                                .withCoreSize(size)
+                                                .withCoreSize(coreSize)
                                                 .withMaxQueueSize(queueSize)
                                                 .withKeepAliveTimeMinutes(1)
                                                 .withQueueSizeRejectionThreshold(queueRejectionSize)),
