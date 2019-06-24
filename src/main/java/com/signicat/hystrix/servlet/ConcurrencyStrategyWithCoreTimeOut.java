@@ -40,10 +40,6 @@ public class ConcurrencyStrategyWithCoreTimeOut extends HystrixConcurrencyStrate
         ThreadPoolExecutor executor = super.getThreadPool(threadPoolKey,
                                                           threadPoolProperties);
 
-        // this change will be overridden by getExecutor in HystrixThreadpoolDefault
-        int tempSize = Math.min(10, executor.getCorePoolSize());
-        executor.setCorePoolSize(tempSize);
-        // continue as usual
         executor.allowCoreThreadTimeOut(true);
         executor.prestartAllCoreThreads();
 
