@@ -219,3 +219,4 @@ that objects *returned* from the `HttpServletRequest` or `HttpServletResponse` a
 somewhere has cached a reference to e.g. a `Writer` (returned from `HttpServletResponse.getWriter()`) early on,
 this can still be (ab)used by the Hystrix thread post-timeout.
 
+
